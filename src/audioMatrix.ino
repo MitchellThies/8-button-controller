@@ -3,8 +3,8 @@
 #define DATA_PIN 2
 #define pushButtonPin 3
 #define potPin A5
-#define maxNumberPatterns 6
-#define BRIGHTNESS  65//128
+#define maxNumberPatterns 2
+#define BRIGHTNESS  128
 
 CRGB leds[NUM_LEDS];
 bool prevButtonState = 0;
@@ -27,8 +27,8 @@ extern CRGBPalette16 myRedWhiteBluePalette;
 extern const TProgmemPalette16 myRedWhiteBluePalette_p PROGMEM;
 
 /*
-  by Ody
-  12-2015
+  by Mitchell Thies
+  10-04-2020
 */
 
 /*********BACK*********
@@ -103,14 +103,13 @@ void setup()
   currentBlending = LINEARBLEND;
 
   pinMode(pushButtonPin, INPUT_PULLUP);
-  //  pinMode(potPin, INPUT);
+  pinMode(potPin, INPUT);
 }
 
 void loop()
 {
   readMSGEQ7();
 
-  clearLED();
 
 //  delay(100);
   // display values of left channel on serial monitor
@@ -128,6 +127,14 @@ void loop()
   }
   Serial.println(" - Right" );
 
+  currentButtonState = digitalRead(pushButtonPin);
+  whichPattern = getWhichPattern(currentButtonState, prevButtonState, whichPattern);
+  prevButtonState = currentButtonState;
+
+  if (whichPattern == 0)
+  {
+  clearLED();
+
   graph(0, left[0]);
   graph(1, left[1]);
   graph(2, left[2]);
@@ -137,15 +144,21 @@ void loop()
   graph(6, left[6]);
 
   FastLED.show();
+  delay(20);
 
-  spec(colpin1, left[0]);
-  spec(colpin2, left[1]);
-  spec(colpin3, left[2]);
-  spec(colpin4, left[3]);
-  spec(colpin5, left[4]);
-  spec(colpin6, left[5]);
-  spec(colpin7, left[6]);
-
+//  spec(colpin1, left[0]);
+//  spec(colpin2, left[1]);
+//  spec(colpin3, left[2]);
+//  spec(colpin4, left[3]);
+//  spec(colpin5, left[4]);
+//  spec(colpin6, left[5]);
+//  spec(colpin7, left[6]);
+  
+  }
+  
+  else if (whichPattern == 1) {
+    cylonDisplay();
+  }
   /*
     spec(colpin1, right[0]);
     spec(colpin2, right[1]);
@@ -260,4 +273,109 @@ void spec(int col, int height)
   }
 
   delay(2);
+}
+
+void cylonDisplay() {
+
+  static uint8_t hue = 0;
+
+  // First slide the led in one direction
+  for (int i = 0; i < NUM_LEDS; i++) {
+    // Set the i'th led to red
+    int delayTime = getDelayFromPot(5, 60);
+
+    leds[i] = CHSV(hue++, 255, 255);
+//    leds2[i] = CHSV(hue++, 255, 255);
+
+    // Show the leds
+    FastLED.show();
+    // now that we've shown the leds, reset the i'th led to black
+    // leds[i] = CRGB::Black;
+    fadeall();
+
+    currentButtonState = digitalRead(pushButtonPin);
+    whichPattern = getWhichPattern(currentButtonState, prevButtonState, whichPattern);
+    prevButtonState = currentButtonState;
+
+    if (whichPattern != 1) {
+      return;
+    }
+
+    // Wait a little bit before we loop around and do it again
+    delay(delayTime);
+  }
+
+  // Now go in the other direction.
+  for (int i = (NUM_LEDS) - 1; i >= 0; i--) {
+    // Set the i'th led to red
+
+    int delayTime = getDelayFromPot(5, 60);
+
+    leds[i] = CHSV(hue++, 255, 255);
+//    leds2[i] = CHSV(hue++, 255, 255);
+    // Show the leds
+    FastLED.show();
+    // now that we've shown the leds, reset the i'th led to black
+    // leds[i] = CRGB::Black;
+    fadeall();
+
+    currentButtonState = digitalRead(pushButtonPin);
+    whichPattern = getWhichPattern(currentButtonState, prevButtonState, whichPattern);
+    prevButtonState = currentButtonState;
+
+    if (whichPattern != 1) {
+      return;
+    }
+
+    // Wait a little bit before we loop around and do it again
+    delay(delayTime);
+  }
+
+}
+
+int getDelayFromPot(int minTime, int maxTime) {
+
+  // Get pot read
+  potValue = analogRead(potPin);
+  int delayTime = potValue / 1023.0 * (maxTime - minTime) + minTime;
+  // end pot read
+  return delayTime;
+}
+
+void fadeall() {
+
+  for (int i = 0; i < NUM_LEDS; i++)
+  {
+    leds[i].nscale8(250);
+//    leds2[i].nscale8(250);
+  }
+
+}
+
+int getWhichPattern(bool currentButtonState, bool prevButtonState, int whichPattern) {
+
+  if (currentButtonState == 1) { // button is pressed down
+
+    if (prevButtonState == 0) { // button pressed for first time
+
+      blackOut();
+      whichPattern = whichPattern + 1; // increment pattern
+      if (whichPattern >= maxNumberPatterns) {
+        whichPattern = 0;
+      }
+    }
+  }
+
+  return whichPattern;
+
+}
+
+
+void blackOut() {
+
+  memset8( leds, 0, NUM_LEDS * sizeof(CRGB));
+//  memset8( leds2, 0, NUM_LEDS * sizeof(CRGB));
+  FastLED.show();
+  FastLED.delay(20);
+
 }
