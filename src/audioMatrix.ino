@@ -3,7 +3,7 @@
 #define DATA_PIN 2
 #define pushButtonPin 3
 #define potPin A5
-#define maxNumberPatterns 2
+#define maxNumberPatterns 4
 #define BRIGHTNESS  128
 
 CRGB leds[NUM_LEDS];
@@ -145,19 +145,50 @@ void loop()
 
   FastLED.show();
   delay(20);
-
-//  spec(colpin1, left[0]);
-//  spec(colpin2, left[1]);
-//  spec(colpin3, left[2]);
-//  spec(colpin4, left[3]);
-//  spec(colpin5, left[4]);
-//  spec(colpin6, left[5]);
-//  spec(colpin7, left[6]);
   
   }
   
-  else if (whichPattern == 1) {
+  else if (whichPattern == 1) 
+  {
+  clearLED();
+
+  graph2(0, left[0]);
+  graph2(1, left[1]);
+  graph2(2, left[2]);
+  graph2(3, left[3]);
+  graph2(4, left[4]);
+  graph2(5, left[5]);
+  graph2(6, left[6]);
+
+  FastLED.show();
+  delay(20);
+    
+  }
+
+  // Top-bottom
+  else if (whichPattern == 2) 
+  {
     cylonDisplay();
+    
+  }
+
+
+
+  else if (whichPattern == 3) 
+  {
+    topBottomColor();
+
+  }
+//
+//  else if (whichPattern == 4) {
+//
+//    colorPal();
+//
+//  }
+
+  else if (whichPattern == 5) {
+
+
   }
   /*
     spec(colpin1, right[0]);
@@ -195,6 +226,39 @@ void graph(int col, int height)
   if (height > 400)
   {
     leds[matrix[col][5]] = CRGB::Red;
+  }
+  if (height > 525)
+  {
+    leds[matrix[col][6]] = CRGB::Red;
+  }
+//  FastLED.show();
+}
+
+void graph2(int col, int height)
+{
+  if (height > 75)
+  {
+    leds[matrix[col][0]] = CRGB::Green;
+  }
+  if (height > 100)
+  {
+    leds[matrix[col][1]] = CRGB::Green;
+  }
+  if (height > 150)
+  {
+    leds[matrix[col][2]] = CRGB::Green;
+  }
+  if (height > 225)
+  {
+    leds[matrix[col][3]] = CRGB::Green;
+  }
+  if (height > 300)
+  {
+    leds[matrix[col][4]] = CRGB::Yellow;
+  }
+  if (height > 400)
+  {
+    leds[matrix[col][5]] = CRGB::Yellow;
   }
   if (height > 525)
   {
@@ -297,7 +361,7 @@ void cylonDisplay() {
     whichPattern = getWhichPattern(currentButtonState, prevButtonState, whichPattern);
     prevButtonState = currentButtonState;
 
-    if (whichPattern != 1) {
+    if (whichPattern != 2) {
       return;
     }
 
@@ -323,7 +387,7 @@ void cylonDisplay() {
     whichPattern = getWhichPattern(currentButtonState, prevButtonState, whichPattern);
     prevButtonState = currentButtonState;
 
-    if (whichPattern != 1) {
+    if (whichPattern != 2) {
       return;
     }
 
@@ -370,6 +434,28 @@ int getWhichPattern(bool currentButtonState, bool prevButtonState, int whichPatt
 
 }
 
+void topBottomColor() {
+
+  int colInd = getDelayFromPot(0, 255);
+
+  for (int i = 0; i < NUM_LEDS; i++) {
+
+    if (colInd > 100) {
+      leds[i] = CRGB(colInd, 210, 40);
+//      leds2[i] = CRGB(30, 100, colInd);
+    }
+
+    else {
+
+      leds[i] = CRGB(colInd, 210, 40);
+//      leds2[i] = CRGB(30, colInd, 100);
+    }
+
+  }
+
+  FastLED.show();
+
+}
 
 void blackOut() {
 
