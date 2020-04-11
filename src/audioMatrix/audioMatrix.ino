@@ -27,9 +27,21 @@ extern CRGBPalette16 myRedWhiteBluePalette;
 extern const TProgmemPalette16 myRedWhiteBluePalette_p PROGMEM;
 
 /*
+  Arduino 3D audio spectrometer 
   by Mitchell Thies
   10-04-2020
+
+  This code mainly merges the two codes listed below with some
+  orginal code for mapping the 
+
+  Based on the following codes:
+  "Fiber Optic" LED Matrix
+  By: jbumstead
+  
+  Arduino LED Audio Spectrum
+  By: aprice27
 */
+
 
 /*********BACK*********
    49 36 35 22 21 08 07
@@ -41,6 +53,7 @@ extern const TProgmemPalette16 myRedWhiteBluePalette_p PROGMEM;
    43 42 29 28 15 14 01
 *********FRONT*********/
 
+// matrix for the LEDs number
 int matrix[7][7] = {
   {43, 44, 45, 46, 47, 48, 49},
   {42, 41, 40, 39, 38, 37, 36},
@@ -50,21 +63,6 @@ int matrix[7][7] = {
   {14, 13, 12, 11, 10, 9, 8},
   {1, 2, 3, 4, 5, 6, 7}
 };
-
-int colpin1 = 7;
-int colpin2 = 8;
-int colpin3 = 9;
-int colpin4 = 10;
-int colpin5 = 11;
-int colpin6 = 12;
-int colpin7 = 13;
-
-
-int rowpin1 = 6;
-int rowpin2 = A2;
-int rowpin3 = A3;
-int rowpin4 = A4;
-int rowpin5 = A5;
 
 int strobe = 4; // strobe pins on digital 4
 int res = 5; // reset pins on digital 5
@@ -77,20 +75,6 @@ void setup()
   Serial.begin(115200);
   pinMode(res, OUTPUT); // reset
   pinMode(strobe, OUTPUT); // strobe
-
-//  pinMode(colpin1, OUTPUT);
-//  pinMode(colpin2, OUTPUT);
-//  pinMode(colpin3, OUTPUT);
-//  pinMode(colpin4, OUTPUT);
-//  pinMode(colpin5, OUTPUT);
-//  pinMode(colpin6, OUTPUT);
-//  pinMode(colpin7, OUTPUT);
-//
-//  pinMode(rowpin1, OUTPUT);
-//  pinMode(rowpin2, OUTPUT);
-//  pinMode(rowpin3, OUTPUT);
-//  pinMode(rowpin4, OUTPUT);
-//  pinMode(rowpin5, OUTPUT);
 
   digitalWrite(res, LOW); // reset low
   digitalWrite(strobe, HIGH); //pin 5 is RESET on the shield
@@ -165,7 +149,6 @@ void loop()
     
   }
 
-  // Top-bottom
   else if (whichPattern == 2) 
   {
     cylonDisplay();
@@ -179,28 +162,14 @@ void loop()
     topBottomColor();
 
   }
-//
-//  else if (whichPattern == 4) {
-//
-//    colorPal();
-//
-//  }
 
-  else if (whichPattern == 5) {
+  else if (whichPattern == 4) {
 
 
   }
-  /*
-    spec(colpin1, right[0]);
-    spec(colpin2, right[1]);
-    spec(colpin3, right[2]);
-    spec(colpin4, right[3]);
-    spec(colpin5, right[4]);
-    spec(colpin6, right[5]);
-    spec(colpin7, right[6]);
-  */
 }
 
+//  
 void graph(int col, int height)
 {
   if (height > 75)
@@ -291,54 +260,7 @@ void readMSGEQ7()
   }
 }
 
-// function that lights of a column depending on height
-void spec(int col, int height)
-{
-  digitalWrite(colpin1, HIGH);
-  digitalWrite(colpin2, HIGH);
-  digitalWrite(colpin3, HIGH);
-  digitalWrite(colpin4, HIGH);
-  digitalWrite(colpin5, HIGH);
-  digitalWrite(colpin6, HIGH);
-  digitalWrite(colpin7, HIGH);
-
-  digitalWrite(rowpin1, LOW);
-  digitalWrite(rowpin2, LOW);
-  digitalWrite(rowpin3, LOW);
-  digitalWrite(rowpin4, LOW);
-  digitalWrite(rowpin5, LOW);
-
-  digitalWrite(col, LOW);
-
-  //for height
-  if (height > 73)
-  {
-    digitalWrite(rowpin1, HIGH);
-  }
-
-  if (height > 80)
-  {
-    digitalWrite(rowpin2, HIGH);
-  }
-
-  if (height > 100)
-  {
-    digitalWrite(rowpin3, HIGH);
-  }
-
-  if (height > 120)
-  {
-    digitalWrite(rowpin4, HIGH);
-  }
-
-  if (height > 140)
-  {
-    digitalWrite(rowpin5, HIGH);
-  }
-
-  delay(2);
-}
-
+// All code below is the "Fiber Optic" LED Matrix project
 void cylonDisplay() {
 
   static uint8_t hue = 0;
